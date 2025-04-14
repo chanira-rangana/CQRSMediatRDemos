@@ -26,6 +26,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+try
+{
+    app.UseSeeder();
+}
+catch (Exception ex)
+{
+	throw ex;
+}
+
 app.UseAuthorization();
 
 app.MapControllers();
