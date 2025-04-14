@@ -1,5 +1,8 @@
 ﻿using CQRSMediatRDemos.Data;
+using CQRSMediatRDemos.Features.Players.CreatePlayer;
+using CQRSMediatRDemos.Features.Players.GetPlayerById;
 using CQRSMediatRDemos.Models;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,7 +10,7 @@ namespace CQRSMediatRDemos.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PlayersController(AppDbContext _context) : ControllerBase
+    public class PlayersController(AppDbContext _context,ISender _sender) : ControllerBase
     {
 
         // GET: api/Players
@@ -21,12 +24,9 @@ namespace CQRSMediatRDemos.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Player>> GetPlayer(int id)
         {
-            var player = await _context.Players.FindAsync(id);
+            var player = await _sender.Send(new GetPlayerByIdQuery(id));
 
-            if (player == null)
-            {
-                return NotFound();
-            }
+            if (player is null) return NotFound();
 
             return player;
         }
@@ -65,12 +65,10 @@ namespace CQRSMediatRDemos.Controllers
         // POST: api/Players
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Player>> PostPlayer(Player player)
+        public async Task<ActionResult<Player>> PostPlayer(CreatePlayerCommand command)
         {
-            _context.Players.Add(player);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPlayer", new { id = player.Id }, player);
+            var playerId = await _sender.Send(command);
+            return Ok(playerId);
         }
 
         // DELETE: api/Players/5

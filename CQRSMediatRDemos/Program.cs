@@ -14,6 +14,9 @@ builder.Services.AddDbContext<AppDbContext>(op =>
 {
     op.UseInMemoryDatabase(databaseName:"AppDb");
 });
+builder.Services.AddMediatR(conf =>{
+    conf.RegisterServicesFromAssembly(typeof(Program).Assembly);
+});
 
 var app = builder.Build();
 
